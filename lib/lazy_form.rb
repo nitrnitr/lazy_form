@@ -21,9 +21,9 @@ module LazyForm
   end
 
   class Tag
-    attr_reader :name, :attributes, :block
+    attr_reader :name, :attributes, :extras, :block
 
-    def initialize(name, attributes = {}, &block)
+    def initialize(name, attributes = {}, extras = '', &block)
       @name = name
       @attributes = attributes
       @block = block
@@ -34,9 +34,9 @@ module LazyForm
       attrs.unshift name
 
       if block.nil?
-        "<#{attrs.reject(&:empty?).join ' '}/>"
+        "<#{attrs.reject(&:empty?).join ' '} #{extras}/>"
       else
-        "<#{attrs.reject(&:empty?).join ' '}>#{block.call}</#{name}>"
+        "<#{attrs.reject(&:empty?).join ' '} #{extras}>#{block.call}</#{name}>"
       end
     end
 
@@ -50,6 +50,7 @@ module LazyForm
           "#{k}=\"#{v}\""
         end
       end.flatten
+
     end
   end
 
@@ -115,7 +116,7 @@ module LazyForm
     end
 
     INPUT_TYPES.each do |type|
-      define_method type do |object_attribute, attributes = {}|
+      define_method type do |object_attribute, attributes = {}, extras = ''|
         attributes[:id] ||= as_id object_attribute
         attributes[:name] ||= as_name object_attribute
         attributes[:type] = type
@@ -124,7 +125,7 @@ module LazyForm
         rescue NoMethodError
         end
 
-        Tag.new 'input', attributes
+        Tag.new 'input', attributes, extras
       end
     end
 
