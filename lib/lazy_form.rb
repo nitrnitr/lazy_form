@@ -21,9 +21,11 @@ module LazyForm
   end
 
   class Tag
-    attr_reader :name, :attributes, :extras, :block
+    attr_reader :name, :attributes, :block
 
-    def initialize(name, attributes = {}, extras = '', &block)
+    BOOLEAN_ATTRIBUTES = [:autofocus, :checked, :disabled, :readonly, :required]
+
+    def initialize(name, attributes = {}, &block)
       @name = name
       @attributes = attributes
       @block = block
@@ -34,9 +36,9 @@ module LazyForm
       attrs.unshift name
 
       if block.nil?
-        "<#{attrs.reject(&:empty?).join ' '} #{extras}/>"
+        "<#{attrs.reject(&:empty?).join ' '}/>"
       else
-        "<#{attrs.reject(&:empty?).join ' '} #{extras}>#{block.call}</#{name}>"
+        "<#{attrs.reject(&:empty?).join ' '}>#{block.call}</#{name}>"
       end
     end
 
@@ -46,6 +48,8 @@ module LazyForm
       attributes.collect do |k, v|
         if v.is_a? Hash
           build_attributes Hash[v.collect { |ik, iv| [:"#{k}-#{ik}", iv] }]
+        elsif BOOLEAN_ATTRIBUTES.include? k
+          v ? k : ''
         else
           "#{k}=\"#{v}\""
         end
@@ -116,7 +120,7 @@ module LazyForm
     end
 
     INPUT_TYPES.each do |type|
-      define_method type do |object_attribute, attributes = {}, extras = ''|
+      define_method type do |object_attribute, attributes = {}|
         attributes[:id] ||= as_id object_attribute
         attributes[:name] ||= as_name object_attribute
         attributes[:type] = type
@@ -125,7 +129,7 @@ module LazyForm
         rescue NoMethodError
         end
 
-        Tag.new 'input', attributes, extras
+        Tag.new 'input', attributes
       end
     end
 
