@@ -23,7 +23,7 @@ module LazyForm
   class Tag
     attr_reader :name, :attributes, :block
 
-    BOOLEAN_ATTRIBUTES = [:autofocus, :checked, :disabled, :readonly, :required]
+    BOOLEAN_ATTRIBUTES = %i(autofocus checked disabled readonly required)
 
     def initialize(name, attributes = {}, &block)
       @name = name
